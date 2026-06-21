@@ -13,3 +13,8 @@ export function formatPercent(value, digits = 2) {
   if (value == null || Number.isNaN(value)) return '0%';
   return `${value.toFixed(digits)}%`;
 }
+
+export function formatApr(value, digits = 2) {
+  if (value == null || Number.isNaN(value)) return `${(0).toFixed(digits)}% p.a.`;
+  return `${value.toFixed(digits)}% p.a.`;
+}

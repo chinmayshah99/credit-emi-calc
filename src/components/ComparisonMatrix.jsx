@@ -1,4 +1,4 @@
-import { formatINR } from '../lib/format';
+import { formatApr, formatINR } from '../lib/format';
 
 export default function ComparisonMatrix({ comparison }) {
   if (!comparison) return null;
@@ -38,7 +38,7 @@ export default function ComparisonMatrix({ comparison }) {
             </div>
             <div className="comparison-row">
               <dt>True APR</dt>
-              <dd>{trueApr.toFixed(2)}% p.a.</dd>
+              <dd>{formatApr(trueApr)}</dd>
             </div>
           </dl>
         </div>

@@ -1,3 +1,5 @@
+import { getEffectiveTenure } from '../lib/emiEngine';
+
 const TENURE_OPTIONS = [3, 6, 9, 12, 18, 24];
 
 export default function InputPanel({ inputs, onChange }) {
@@ -9,10 +11,7 @@ export default function InputPanel({ inputs, onChange }) {
     onChange({ ...inputs, tenure: Number(value), customTenure: '' });
   };
 
-  const effectiveTenure =
-    inputs.customTenure !== '' && inputs.customTenure != null
-      ? parseInt(inputs.customTenure, 10)
-      : inputs.tenure;
+  const effectiveTenure = getEffectiveTenure(inputs);
 
   return (
     <aside className="inputs-panel card">

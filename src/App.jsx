@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { calculateAll, DEFAULT_INPUTS } from './lib/emiEngine';
-import { formatINR } from './lib/format';
+import { formatApr, formatINR } from './lib/format';
 import InputPanel from './components/InputPanel';
 import CostBreakdown from './components/CostBreakdown';
 import AmortTable from './components/AmortTable';
@@ -38,7 +38,7 @@ function App() {
             <div className="summary-bar-item">
               <span className="summary-bar-label">True APR</span>
               <span className="summary-bar-value accent">
-                {results.breakdown.trueApr.toFixed(2)}% p.a.
+                {formatApr(results.breakdown.trueApr)}
               </span>
             </div>
             <div className="summary-bar-item">

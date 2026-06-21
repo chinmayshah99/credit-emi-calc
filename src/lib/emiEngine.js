@@ -1,3 +1,5 @@
+import { formatINR } from './format';
+
 export const DEFAULT_INPUTS = {
   purchasePrice: 60000,
   emiMode: 'regular',
@@ -219,7 +221,7 @@ export function calculateAll(rawInputs) {
         savesMoney: savings > 0,
         message:
           savings > 0
-            ? `Foreclosing at Month ${closeMonth} will save you ${formatCurrencyInline(savings)} in future interest and tax obligations.`
+            ? `Foreclosing at Month ${closeMonth} will save you ${formatINR(savings)} in future interest and tax obligations.`
             : `Foreclosing early at this juncture is more expensive due to penalty levies.`,
       };
     }
@@ -265,12 +267,4 @@ export function calculateAll(rawInputs) {
     },
     foreclosure,
   };
-}
-
-function formatCurrencyInline(value) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(value);
 }

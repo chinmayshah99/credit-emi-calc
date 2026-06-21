@@ -1,4 +1,4 @@
-import { formatINR } from '../lib/format';
+import { formatApr, formatINR } from '../lib/format';
 
 export default function CostBreakdown({ breakdown, isNoCost }) {
   if (!breakdown) return null;
@@ -82,7 +82,7 @@ export default function CostBreakdown({ breakdown, isNoCost }) {
         </div>
         <div className="breakdown-row highlight">
           <dt>True Effective Annual Rate (APR)</dt>
-          <dd>{trueApr.toFixed(2)}% p.a.</dd>
+          <dd>{formatApr(trueApr)}</dd>
         </div>
       </dl>
     </section>
