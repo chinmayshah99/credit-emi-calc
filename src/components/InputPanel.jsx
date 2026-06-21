@@ -28,6 +28,21 @@ export default function InputPanel({ inputs, onChange }) {
             required
           />
         </div>
+
+        <div className="field">
+          <label htmlFor="cartDiscount">Instant Cart / Exchange Discount (₹)</label>
+          <p className="section-desc">
+            Applied at checkout before EMI; reduces the amount financed.
+          </p>
+          <input
+            id="cartDiscount"
+            type="number"
+            min="0"
+            step="100"
+            value={inputs.cartDiscount}
+            onChange={(e) => handleChange('cartDiscount', e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="input-section">
@@ -35,13 +50,20 @@ export default function InputPanel({ inputs, onChange }) {
 
         <div className="field">
           <span className="label">EMI Mode</span>
-          <div className="toggle-group">
+          <div className="toggle-group emi-mode-toggle">
             <button
               type="button"
               className={inputs.emiMode === 'regular' ? 'active' : ''}
               onClick={() => handleChange('emiMode', 'regular')}
             >
               Regular EMI
+            </button>
+            <button
+              type="button"
+              className={inputs.emiMode === 'low-cost' ? 'active' : ''}
+              onClick={() => handleChange('emiMode', 'low-cost')}
+            >
+              Low-Cost EMI
             </button>
             <button
               type="button"
@@ -89,17 +111,31 @@ export default function InputPanel({ inputs, onChange }) {
           </div>
         )}
 
-        <div className="field">
-          <label htmlFor="statedRate">Stated Interest Rate (% p.a.)</label>
-          <input
-            id="statedRate"
-            type="number"
-            min="0"
-            step="0.1"
-            value={inputs.statedRate}
-            onChange={(e) => handleChange('statedRate', e.target.value)}
-          />
-        </div>
+        {inputs.emiMode === 'low-cost' ? (
+          <div className="field">
+            <label htmlFor="effectiveRate">Effective Interest Rate (% p.a.)</label>
+            <input
+              id="effectiveRate"
+              type="number"
+              min="0"
+              step="0.1"
+              value={inputs.effectiveRate}
+              onChange={(e) => handleChange('effectiveRate', e.target.value)}
+            />
+          </div>
+        ) : (
+          <div className="field">
+            <label htmlFor="statedRate">Stated Interest Rate (% p.a.)</label>
+            <input
+              id="statedRate"
+              type="number"
+              min="0"
+              step="0.1"
+              value={inputs.statedRate}
+              onChange={(e) => handleChange('statedRate', e.target.value)}
+            />
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="processingFeeValue">Processing / Conversion Fee</label>

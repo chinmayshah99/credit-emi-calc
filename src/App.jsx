@@ -20,7 +20,7 @@ function App() {
         <h1>Credit Card EMI Total Cost Calculator</h1>
         <p className="subtitle">
           Discover the true cost of Indian credit card EMI offers — including GST, processing
-          fees, and No-Cost EMI hidden charges.
+          fees, stacked checkout discounts, and hidden charges in No-Cost and Low-Cost EMI plans.
         </p>
       </header>
 
@@ -42,7 +42,7 @@ function App() {
               </span>
             </div>
             <div className="summary-bar-item">
-              <span className="summary-bar-label">Extra over cash</span>
+              <span className="summary-bar-label">Extra over upfront</span>
               <span className="summary-bar-value">
                 {formatINR(results.breakdown.extraCost)}
               </span>
@@ -57,7 +57,7 @@ function App() {
             <>
               <CostBreakdown
                 breakdown={results.breakdown}
-                isNoCost={results.inputs.isNoCost}
+                emiMode={results.inputs.emiMode}
               />
               <ComparisonMatrix comparison={results.comparison} />
               {results.foreclosure && (

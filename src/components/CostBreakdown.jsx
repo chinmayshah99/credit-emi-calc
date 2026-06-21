@@ -1,10 +1,12 @@
 import { formatApr, formatINR } from '../lib/format';
 
-export default function CostBreakdown({ breakdown, isNoCost }) {
+export default function CostBreakdown({ breakdown, emiMode }) {
   if (!breakdown) return null;
 
   const {
     purchasePrice,
+    cartDiscount,
+    emiBasePrice,
     merchantDiscount,
     netLoanPrincipal,
     totalInterest,
@@ -15,7 +17,6 @@ export default function CostBreakdown({ breakdown, isNoCost }) {
     absoluteTotalCost,
     extraCost,
     extraCostPercent,
-    costFloored,
     trueApr,
     baseEmi,
   } = breakdown;
@@ -23,17 +24,22 @@ export default function CostBreakdown({ breakdown, isNoCost }) {
   return (
     <section className="card">
       <h2>Cost Breakdown</h2>
-      {costFloored && (
-        <div className="warning-badge">
-          Heavy discounts applied — extra cost floored at net loan principal.
-        </div>
-      )}
       <dl className="breakdown-list">
         <div className="breakdown-row">
           <dt>Base Item Price</dt>
           <dd>{formatINR(purchasePrice)}</dd>
         </div>
-        {isNoCost && merchantDiscount > 0 && (
+        {cartDiscount > 0 && (
+          <div className="breakdown-row deduction">
+            <dt>Less: Instant Cart / Exchange Discount</dt>
+            <dd>−{formatINR(cartDiscount)}</dd>
+          </div>
+        )}
+        <div className="breakdown-row highlight">
+          <dt>EMI Base Price</dt>
+          <dd>{formatINR(emiBasePrice)}</dd>
+        </div>
+        {emiMode === 'no-cost' && merchantDiscount > 0 && (
           <div className="breakdown-row deduction">
             <dt>Less: Upfront Merchant/No-Cost Discount</dt>
             <dd>−{formatINR(merchantDiscount)}</dd>
@@ -74,7 +80,7 @@ export default function CostBreakdown({ breakdown, isNoCost }) {
           <dd>{formatINR(absoluteTotalCost)}</dd>
         </div>
         <div className="breakdown-row total">
-          <dt>Net Extra Cost Over Cash Price</dt>
+          <dt>Net Extra Cost Over Upfront Payment</dt>
           <dd>
             {formatINR(extraCost)}{' '}
             <span className="muted">({extraCostPercent.toFixed(2)}% premium)</span>

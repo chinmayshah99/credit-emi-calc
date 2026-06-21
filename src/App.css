@@ -191,7 +191,13 @@
 
 .toggle-group {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
+}
+
+.toggle-group.emi-mode-toggle button {
+  flex: 1 1 calc(33.333% - 0.35rem);
+  min-width: 5.5rem;
 }
 
 .toggle-group button {
@@ -349,6 +355,13 @@ td {
 
 tbody tr:hover {
   background: var(--surface-muted);
+}
+
+.comparison-context {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .comparison-grid {

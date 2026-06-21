@@ -2,10 +2,12 @@ import { formatINR } from './format';
 
 export const DEFAULT_INPUTS = {
   purchasePrice: 60000,
+  cartDiscount: 0,
   emiMode: 'regular',
   tenure: 6,
   customTenure: '',
   statedRate: 16,
+  effectiveRate: 9,
   processingFeeValue: 299,
   processingFeeType: 'flat',
   gstRate: 18,
@@ -124,27 +126,41 @@ export function solveTrueAPR(cashFlows) {
 
 export function calculateAll(rawInputs) {
   const purchasePrice = Number(rawInputs.purchasePrice) || 0;
+  const cartDiscount = Number(rawInputs.cartDiscount) || 0;
   const annualRate = Number(rawInputs.statedRate) || 0;
+  const effectiveRate = Number(rawInputs.effectiveRate) || 0;
   const gstRate = Number(rawInputs.gstRate) || 0;
   const directDiscount = Number(rawInputs.directDiscount) || 0;
   const cashDiscount = Number(rawInputs.cashDiscount) || 0;
   const foreclosureFeeRate = Number(rawInputs.foreclosureFee) || 0;
   const months = getEffectiveTenure(rawInputs);
-  const isNoCost = rawInputs.emiMode === 'no-cost';
+  const emiMode = rawInputs.emiMode;
+  const isNoCost = emiMode === 'no-cost';
+  const isLowCost = emiMode === 'low-cost';
 
   if (purchasePrice <= 0 || months <= 0) {
     return { valid: false, error: 'Enter a valid purchase price and tenure.' };
   }
 
-  let netLoanPrincipal = purchasePrice;
+  if (cartDiscount >= purchasePrice) {
+    return {
+      valid: false,
+      error: 'Cart discount must be less than the purchase price.',
+    };
+  }
+
+  const emiBasePrice = Math.max(0, purchasePrice - cartDiscount);
+
+  let netLoanPrincipal = emiBasePrice;
   let merchantDiscount = 0;
 
   if (isNoCost) {
-    netLoanPrincipal = solveNoCostPrincipal(purchasePrice, annualRate, months);
-    merchantDiscount = purchasePrice - netLoanPrincipal;
+    netLoanPrincipal = solveNoCostPrincipal(emiBasePrice, annualRate, months);
+    merchantDiscount = emiBasePrice - netLoanPrincipal;
   }
 
-  const schedule = buildSchedule(netLoanPrincipal, annualRate, months, gstRate);
+  const scheduleRate = isLowCost ? effectiveRate : annualRate;
+  const schedule = buildSchedule(netLoanPrincipal, scheduleRate, months, gstRate);
   const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
   const totalInterestGst = schedule.reduce((sum, row) => sum + row.gstOnInterest, 0);
   const totalBaseEmi = schedule.reduce((sum, row) => sum + row.baseEmi, 0);
@@ -164,7 +180,7 @@ export function calculateAll(rawInputs) {
     gstOnProcessing -
     directDiscount;
 
-  const upfrontEffectiveCost = Math.max(0, purchasePrice - cashDiscount);
+  const upfrontEffectiveCost = Math.max(0, emiBasePrice - cashDiscount);
   const upfrontTotalOutflow = upfrontEffectiveCost;
   const extraCost = absoluteTotalCost - upfrontEffectiveCost;
   const extraCostPercent =
@@ -173,7 +189,7 @@ export function calculateAll(rawInputs) {
   const upfrontOutflow = processingFee + gstOnProcessing - directDiscount;
   const monthlyOutflows = schedule.map((row) => row.totalOutflow);
   const trueApr = solveTrueAPR({
-    inflow: purchasePrice,
+    inflow: emiBasePrice,
     outflows: [upfrontOutflow, ...monthlyOutflows],
   });
 
@@ -232,13 +248,18 @@ export function calculateAll(rawInputs) {
     inputs: {
       purchasePrice,
       months,
-      isNoCost,
+      emiMode,
       annualRate,
+      effectiveRate,
       gstRate,
       directDiscount,
+      cartDiscount,
+      emiBasePrice,
     },
     breakdown: {
       purchasePrice,
+      cartDiscount,
+      emiBasePrice,
       merchantDiscount,
       netLoanPrincipal,
       totalInterest,
@@ -257,6 +278,8 @@ export function calculateAll(rawInputs) {
     schedule,
     comparison: {
       purchasePrice,
+      cartDiscount,
+      emiBasePrice,
       cashDiscount,
       upfrontTotalOutflow,
       upfrontEffectiveCost,
