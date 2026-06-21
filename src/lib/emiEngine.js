@@ -8,6 +8,7 @@ export const DEFAULT_INPUTS = {
   processingFeeType: 'flat',
   gstRate: 18,
   directDiscount: 0,
+  cashDiscount: 0,
   modelEarlyClosure: false,
   foreclosureFee: 3,
   closeAfterMonth: 3,
@@ -124,6 +125,7 @@ export function calculateAll(rawInputs) {
   const annualRate = Number(rawInputs.statedRate) || 0;
   const gstRate = Number(rawInputs.gstRate) || 0;
   const directDiscount = Number(rawInputs.directDiscount) || 0;
+  const cashDiscount = Number(rawInputs.cashDiscount) || 0;
   const foreclosureFeeRate = Number(rawInputs.foreclosureFee) || 0;
   const months = getEffectiveTenure(rawInputs);
   const isNoCost = rawInputs.emiMode === 'no-cost';
@@ -152,7 +154,7 @@ export function calculateAll(rawInputs) {
   );
   const gstOnProcessing = processingFee * (gstRate / 100);
 
-  let absoluteTotalCost =
+  const absoluteTotalCost =
     netLoanPrincipal +
     totalInterest +
     totalInterestGst +
@@ -160,15 +162,11 @@ export function calculateAll(rawInputs) {
     gstOnProcessing -
     directDiscount;
 
-  let costFloored = false;
-  const rawExtraCost = absoluteTotalCost - purchasePrice;
-  if (rawExtraCost < 0) {
-    absoluteTotalCost = netLoanPrincipal;
-    costFloored = true;
-  }
-
-  const extraCost = absoluteTotalCost - purchasePrice;
-  const extraCostPercent = purchasePrice > 0 ? (extraCost / purchasePrice) * 100 : 0;
+  const upfrontEffectiveCost = Math.max(0, purchasePrice - cashDiscount);
+  const upfrontTotalOutflow = upfrontEffectiveCost;
+  const extraCost = absoluteTotalCost - upfrontEffectiveCost;
+  const extraCostPercent =
+    upfrontEffectiveCost > 0 ? (extraCost / upfrontEffectiveCost) * 100 : 0;
 
   const upfrontOutflow = processingFee + gstOnProcessing - directDiscount;
   const monthlyOutflows = schedule.map((row) => row.totalOutflow);
@@ -177,15 +175,15 @@ export function calculateAll(rawInputs) {
     outflows: [upfrontOutflow, ...monthlyOutflows],
   });
 
-  const upfrontEffectiveCost = purchasePrice;
   const emiTotalOutflow = absoluteTotalCost;
 
   let recommendation = 'pay-upfront';
-  let recommendationText = 'Paying upfront preserves more cash overall.';
+  let recommendationText = 'Paying upfront costs less after discounts.';
 
   if (emiTotalOutflow < upfrontEffectiveCost) {
     recommendation = 'emi';
-    recommendationText = 'The chosen EMI strategy preserves more cash overall.';
+    recommendationText =
+      'The chosen EMI strategy costs less than paying upfront after discounts.';
   } else if (Math.abs(emiTotalOutflow - upfrontEffectiveCost) < 1) {
     recommendation = 'tie';
     recommendationText = 'Both options have roughly the same effective cost.';
@@ -247,16 +245,18 @@ export function calculateAll(rawInputs) {
       processingFee,
       gstOnProcessing,
       directDiscount,
+      cashDiscount,
       absoluteTotalCost,
       extraCost,
       extraCostPercent,
-      costFloored,
       trueApr,
       baseEmi: schedule[0]?.baseEmi ?? 0,
     },
     schedule,
     comparison: {
-      upfrontTotalOutflow: purchasePrice,
+      purchasePrice,
+      cashDiscount,
+      upfrontTotalOutflow,
       upfrontEffectiveCost,
       emiTotalOutflow,
       trueApr,
