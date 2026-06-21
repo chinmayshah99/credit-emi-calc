@@ -27,10 +27,6 @@ export default function ComparisonMatrix({ comparison }) {
               <dt>Effective Cost</dt>
               <dd>{formatINR(upfrontEffectiveCost)}</dd>
             </div>
-            <div className="comparison-row">
-              <dt>Perk</dt>
-              <dd>Full reward points retained</dd>
-            </div>
           </dl>
         </div>
         <div className="comparison-col">
@@ -44,16 +40,13 @@ export default function ComparisonMatrix({ comparison }) {
               <dt>True APR</dt>
               <dd>{trueApr.toFixed(2)}% p.a.</dd>
             </div>
-            <div className="comparison-row">
-              <dt>Impact</dt>
-              <dd>Credit limit blocked by the remaining loan balance</dd>
-            </div>
           </dl>
         </div>
       </div>
-      <p className={`recommendation recommendation-${recommendation}`}>
-        <strong>Recommendation:</strong> {recommendationText}
-      </p>
+      <div className={`recommendation recommendation-${recommendation}`}>
+        <p className="recommendation-label">Recommendation</p>
+        <p className="recommendation-text">{recommendationText}</p>
+      </div>
     </section>
   );
 }
